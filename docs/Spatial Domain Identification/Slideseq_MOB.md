@@ -172,5 +172,4 @@ fitting ... <br>
 (-5108.555, -588.545, -5670.73, -847.6700000000001)
 </details>
 
-<img src="./Figures/SDI/SDI_SlideseqV2_MOB_domain.png">
-![](https://github.com/KEAML-JLU/RIF/main/docs/Figures/SDI/SDI_SlideseqV2_MOB_domain.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/SDI/SDI_SlideseqV2_MOB_domain.png)
