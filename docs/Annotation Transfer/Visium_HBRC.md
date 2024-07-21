@@ -141,4 +141,4 @@ batch nodes change from 4096 to 3798. <br>
 ... storing 'genome' as categorical <br>
 </details>
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/Transfer/Transfer_HBRC.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/Transfer/Transfer_HBRC.png)
