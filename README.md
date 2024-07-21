@@ -1,8 +1,8 @@
-# Pseudo-label supervised graph neural network unveils robust, fine-grained, interpretable spatial domains
+![image](https://github.com/user-attachments/assets/88591665-ade8-41eb-8be4-54f1f1a79979)![image](https://github.com/user-attachments/assets/089d1a3a-d1af-4868-9aba-d4f149770e9b)# Pseudo-label supervised graph neural network unveils robust, fine-grained, interpretable spatial domains
 
 ![](https://github.com/DDDoGGie/RIF/blob/main/figures/model.png)
 ## Overview
 Spatial transcriptomics sequencing offers a powerful approach to quantify gene expression while preserving the spatial context within tissue. Accurately identifying spatial domains is essential in the analysis of spatial transcriptomic data. Despite the availability of many methods, challenges persist in precisely delineating spatially distant domains, maintaining tissue fine structure, and ensuring stable performance across different platforms. To tackle these challenges, we introduce RIF, a Robust and Interpretable deep learning framework for Fine-grained spatial domain identification. RIF successfully identified spatially distant, intricately structured ventral and dorsal hippocampal regions in the sagittal mouse brain section through pseudo-labels guided graph neural network, which is designed for preserving global and fine structures. Then, the domains on a breast cancer section identified by RIF confirmed the immunosuppression in cancer. Further, RIF revealed validated ferroptosis-related genes in breast cancer by interpreting the trained spatial domain identification network. In addition, RIF adopts a cross-scale learning strategy to understand gene expression from two perspectives, thereby bolstering robustness. Comprehensive comparison with 13 state-of-the-art methods across various sequencing platforms in terms of accuracy, representation quality, and computational cost demonstrated RIF's superiority on spatial transcriptomic data analysis.
 
 
-Documents can be found in [https://dddoggie.github.io/RIF/](https://dddoggie.github.io/RIF/).
+Documents can be found in [https://keaml-jlu.github.io/RIF/](https://keaml-jlu.github.io/RIF/).
