@@ -172,4 +172,4 @@ fitting ... <br>
 (-5108.555, -588.545, -5670.73, -847.6700000000001)
 </details>
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SDI/SDI_SlideseqV2_MOB_domain.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_SlideseqV2_MOB_domain.png)
