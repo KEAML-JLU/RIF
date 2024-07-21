@@ -173,4 +173,4 @@ fitting ... <br>
 </details>
 
 <img src="./Figures/SDI/SDI_SlideseqV2_MOB_domain.png">
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_SlideseqV2_MOB_domain.png)
+![](https://github.com/KEAML-JLU/RIF/main/docs/Figures/SDI/SDI_SlideseqV2_MOB_domain.png)
