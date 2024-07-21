@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/88591665-ade8-41eb-8be4-54f1f1a79979)![image](https://github.com/user-attachments/assets/089d1a3a-d1af-4868-9aba-d4f149770e9b)# Pseudo-label supervised graph neural network unveils robust, fine-grained, interpretable spatial domains
+# Pseudo-label supervised graph neural network unveils robust, fine-grained, interpretable spatial domains
 
 ![](https://github.com/DDDoGGie/RIF/blob/main/figures/model.png)
 ## Overview
