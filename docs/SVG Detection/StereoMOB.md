@@ -160,8 +160,8 @@ for gene in test_gene_list:
         plt.axis('equal')
 ```
 
-![https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_PCP4.png](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_PCP4.png)
-![https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_RASL11B.png](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_RASL11B.png)
-![https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_SPP1.png](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_SPP1.png)
-![https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_GABRA1.png](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_GABRA1.png)
-![https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_S100A5.png](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_MOB_S100A5.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_MOB_CNP.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_MOB_RASL11B.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_MOB_SPP1.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_MOB_GABRA1.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_MOB_S100A5.png)
