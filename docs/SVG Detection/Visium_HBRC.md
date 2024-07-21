@@ -192,5 +192,5 @@ for gene in test_gene_list:
         sc.pl.spatial(adata, color=gene, s=12, alpha_img=0.3)
 ```
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_HBRC_AQP3.png)
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_HBRC_CALD1.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_HBRC_AQP3.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_HBRC_CALD1.png)
