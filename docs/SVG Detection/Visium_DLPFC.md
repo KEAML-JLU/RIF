@@ -163,9 +163,9 @@ for marker in marker_gene_list:
         sc.pl.spatial(adata, color=marker, alpha_img=0.3, s=12)
 ```
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_DLPFC_CNP.png)
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_DLPFC_DIRAS2.png)
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_DLPFC_PCP4.png)
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_DLPFC_NEFM.png)
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_DLPFC_HPCAL1.png)
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SVG/SVG_DLPFC_CXCL14.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_DLPFC_CNP.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_DLPFC_DIRAS2.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_DLPFC_PCP4.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_DLPFC_NEFM.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_DLPFC_HPCAL1.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SVG/SVG_DLPFC_CXCL14.png)
