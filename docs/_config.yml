@@ -1,0 +1,14 @@
+title: RIF
+lang: en
+description: Pseudo-label supervised graph neural network unveils robust, interpretable, fine-grained spatial domains
+
+remote_theme: rundocs/jekyll-rtd-theme
+
+readme_index:
+  with_frontmatter: true
+
+exclude:
+  - Makefile
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
