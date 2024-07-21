@@ -181,7 +181,7 @@ sc.pl.embedding(adata, basis='spatial', color=['combined_refine'], title=['RIF']
 &lt AxesSubplot: title={'center': 'RIF'}, xlabel='spatial1', ylabel='spatial2' &gt
 </details>
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SDI/SDI_Stereoseq_MOB_domain.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_Stereoseq_MOB_domain.png)
 
 ## 5. UMAP visualization
 
@@ -195,4 +195,4 @@ sc.pl.umap(adata, color=['combined_refine'], title=['RIF'], s=9, frameon=False, 
 &lt AxesSubplot: title={'center': 'RIF'}, xlabel='UMAP1', ylabel='UMAP2'&gt
 </details>
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/SDI/SDI_Stereoseq_MOB_umap.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_Stereoseq_MOB_umap.png)
