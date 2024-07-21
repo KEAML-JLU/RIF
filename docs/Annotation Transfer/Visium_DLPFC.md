@@ -157,7 +157,7 @@ sc.pl.spatial(adata_target, color=[args.cluster_label, 'RIF Transfer'], title=['
 ... storing 'genome' as categorical <br>
 </details>
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/Transfer/Transfer_DLPFC_domain.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/Transfer/Transfer_DLPFC_domain.png)
 
 ## 4. Batch effect removal
 
@@ -212,4 +212,4 @@ sc.pl.umap(adata, color=['layer_guess', 'batch'], title=['Manually Annotation', 
 ... storing 'layer_guess' as categorical <br>
 </details>
 
-![](https://github.com/DDDoGGie/RIF/raw/gh-pages/docs/Figures/Transfer/Transfer_DLPFC_umap.png)
+![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/Transfer/Transfer_DLPFC_umap.png)
