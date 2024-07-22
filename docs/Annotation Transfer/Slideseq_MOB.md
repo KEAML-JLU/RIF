@@ -154,8 +154,8 @@ plt.axis('equal')
 (-5108.555, -588.545, -5670.73, -847.6700000000001)
 </details>
 
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/Transfer/Transfer_Stereoseq_MOB_domain.png)
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/Transfer/Transfer_SlideseqV2_MOB_domain.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/Transfer/Transfer_Stereoseq_MOB_domain.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/Transfer/Transfer_SlideseqV2_MOB_domain.png)
 
 ## 4. Batch effect removal
 
@@ -192,4 +192,4 @@ sc.pl.umap(adata_combine, color=['batch', 'name'], title=['Batch', 'cluster'], s
  &lt AxesSubplot: title={'center': 'cluster'}, xlabel='UMAP1', ylabel='UMAP2'&gt ] <br>
 </details>
 
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/Transfer/Transfer_MOB_batch.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/Transfer/Transfer_MOB_batch.png)
