@@ -161,7 +161,7 @@ sc.pl.spatial(adata, color=['layer_guess', new_key], title=['Manually Annotation
               s=8, frameon=False)
 ```
 
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_DLPFC_domain.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/SDI/SDI_DLPFC_domain.png)
 
 
 ## 4. Visuialize embedding by UMAP
@@ -171,7 +171,7 @@ sc.tl.umap(adata)
 sc.pl.umap(adata, color=['layer_guess', new_key], title=['Manually Annotation', 'RIF'], frameon=False)
 ```
 
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_DLPFC_umap.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/SDI/SDI_DLPFC_umap.png)
 
 ## 5. Trajectory inference by PAGA
 ```python
@@ -180,4 +180,4 @@ sc.tl.paga(adata_reduce, groups='layer_guess')
 sc.pl.paga(adata_reduce, fontsize=14)
 ```
 
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_DLPFC_paga.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/SDI/SDI_DLPFC_paga.png)
