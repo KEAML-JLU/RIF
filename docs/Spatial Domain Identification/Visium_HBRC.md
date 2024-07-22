@@ -177,4 +177,4 @@ sc.pl.spatial(adata, color=[args.cluster_label, 'combined'], palette=palette, ti
 ... storing 'pred2_refine' as categorical <br>
 </details>
 
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_HBRC_domain.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/SDI/SDI_HBRC_domain.png)
