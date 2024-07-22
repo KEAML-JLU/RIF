@@ -177,4 +177,4 @@ sc.pl.spatial(adata, color=['combined'], title=['RIF'], palette=palette, s=10, f
 ... storing 'feature_types' as categorical <br>
 ... storing 'genome' as categorical 
 </details>
-![](https://github.com/KEAML-JLU/RIF/blob/main/docs/Figures/SDI/SDI_Mousebrain_domain.png)
+![](https://github.com/KEAML-JLU/RIF/raw/main/docs/Figures/SDI/SDI_Mousebrain_domain.png)
