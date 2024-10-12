@@ -143,7 +143,7 @@ fitting ... <br>
 ## 3. Model training
 
 ```python
-adata, _ = Riff.GSG_train(args, adata, graph, num_classes)
+adata, _ = Riff.train(args, adata, graph, num_classes)
 ```
 <details>
 <summary> </summary>
