@@ -153,7 +153,7 @@ fitting ... <br>
 ## 3. Model training and Robust spatial domain identification
 
 ```python
-adata, _ = Riff.GSG_train(args, adata, graph, num_classes)
+adata, _ = Riff.train(args, adata, graph, num_classes)
 
 adata.obs["pred1_refine"] = Riff.refine_label(adata, args.radius, key='cluster_pred1')
 adata.obs["pred2_refine"] = Riff.refine_label(adata, args.radius, key='cluster_pred2')
