@@ -30,13 +30,7 @@ def mkdir(path):
 	else:
 		print("---  There is this folder!  ---")
 
-def read_h5ad(path):
-    adata = sc.read_h5ad(path+".h5ad")
-    adata.obs["imagecol"] = adata.obsm["spatial"][:, 0]
-    adata.obs["imagerow"] = adata.obsm["spatial"][:, 1]
-    return adata
-
-def read_10X_Visium_with_label(path, 
+def Read_Visium_with_label(path, 
                     genome=None,
                     count_file='filtered_feature_bc_matrix.h5', 
                     library_id=None, 
@@ -58,17 +52,98 @@ def read_10X_Visium_with_label(path,
     else:
         scale = adata.uns["spatial"][library_id]["scalefactors"][
             "tissue_" + quality + "_scalef"]
-        image_coor = adata.obsm["spatial"] * scale
+    image_coor = adata.obsm["spatial"] * scale
     if(os.path.exists(path + "/metadata.tsv")):
         adata.obs = pd.read_table(path + "/metadata.tsv",sep="\t",index_col=0)
     adata.obs["imagecol"] = image_coor[:, 0]
     adata.obs["imagerow"] = image_coor[:, 1]
+    adata.obsm['image_coor'] = image_coor
     adata.uns["spatial"][library_id]["use_quality"] = quality
     return adata
 
-def build_graph(args, adata, need_preclust=True):
-    print("=============== Contructing graph =================")
-    position = adata.obs[["imagerow","imagecol"]].values
+def Read_10X_Visium_with_label(path):
+    adata = sc.read_visium(path)
+    adata.var_names_make_unique()
+    adata.obs_names_make_unique()
+    return adata
+
+def Read_Xenium(h5_path, obs_path):
+    adata = sc.read_10x_h5(h5_path)
+    adata.obs = pd.read_csv(obs_path, index_col=0)
+    adata.var_names = adata.var_names.astype(str)
+    adata.obs_names = adata.obs_names.astype(str)
+    adata.var_names_make_unique()
+    adata.obs_names_make_unique()
+    adata.obsm['spatial'] = adata.obs[['x_centroid', 'y_centroid']].values
+    return adata
+
+def Read_Stereoseq(path):
+    count_path = os.path.join(path, "RNA_counts.tsv")
+    pos_path = os.path.join(path, "position.tsv")
+    spot_path = os.path.join(path, "used_barcodes.txt")
+    counts = pd.read_csv(count_path, sep='\t', index_col=0)
+    pos = pd.read_csv(pos_path, sep='\t')
+    used_barcode = pd.read_csv(spot_path, sep='\t', header=None)
+
+    counts.columns = ['Spot_'+str(x) for x in counts.columns]
+    pos.index = pos['label'].map(lambda x: 'Spot_'+str(x))
+    pos = pos.loc[:, ['x','y']]
+    pos.columns = ["imagerow","imagecol"]
+
+    adata = sc.AnnData(counts.T)
+    adata.var_names_make_unique()
+    pos = pos.loc[adata.obs_names, ['imagerow', 'imagecol']]
+    adata.obsm["spatial"] = pos.to_numpy()
+    adata.obs["imagerow"] = 0
+    adata.obs["imagecol"] = 0
+    adata.obs["imagerow"] = adata.obsm["spatial"][:, 0]
+    adata.obs["imagecol"] = adata.obsm["spatial"][:, 1]
+    sc.pp.calculate_qc_metrics(adata, inplace=True)
+
+    used_barcode = used_barcode[0]
+    adata = adata[used_barcode,]
+    return adata
+
+def Read_SlideseqV2(path):
+    count_path = os.path.join(path, "digital_expression.txt")
+    pos_path = os.path.join(path, "bead_locations.csv")
+    spot_path = os.path.join(path, "used_barcodes.txt")
+    gene_expression = pd.read_table(count_path)
+    position = pd.read_csv(pos_path, index_col=0)
+    used_barcodes = pd.read_table(spot_path, header=None)
+
+    obs_name = list(used_barcodes[0].values)
+    var_name = list(gene_expression["GENE"].values)
+    X = gene_expression[used_barcodes[0].values].T.values
+    adata = sc.AnnData(X)
+    adata.obs_names = obs_name
+    adata.var_names = var_name
+
+    position.index = position["barcode"]
+    position = position.loc[obs_name]
+    spatial = position[['xcoord', 'ycoord']].values
+    adata.obsm["spatial"] = spatial
+
+    adata.obs["imagerow"] = 0
+    adata.obs["imagecol"] = 0
+    adata.obs["imagerow"] = adata.obsm["spatial"][:, 0]
+    adata.obs["imagecol"] = adata.obsm["spatial"][:, 1]
+    return adata
+
+def Preprocess_adata(args, adata):
+    if args.seq_tech == 'Visium':
+        sc.pp.filter_genes(adata, min_cells=5)
+    elif args.seq_tech == 'Stereo-seq':
+        sc.pp.filter_genes(adata, min_cells=50)
+    sc.pp.highly_variable_genes(adata, flavor="seurat_v3", n_top_genes=args.num_features)
+    sc.pp.normalize_total(adata, target_sum=1e4)
+    sc.pp.log1p(adata)
+    adata = adata[:, adata.var['highly_variable']]
+    return adata
+
+def Build_graph(args, adata, spatial_key="spatial"):
+    print("=================== Contructing graph =====================")
+    position = adata.obsm[spatial_key]
     spot_num = len(position)
     adjacent_head = torch.from_numpy(np.arange(spot_num).repeat(args.num_neighbors))
     NN_model = NearestNeighbors(n_neighbors=args.num_neighbors, algorithm="ball_tree").fit(position)
@@ -76,15 +151,6 @@ def build_graph(args, adata, need_preclust=True):
     adjacent_tail = torch.from_numpy(adjacent_tail.flatten())
     graph = dgl.graph((adjacent_head,adjacent_tail))
 
-    adata.var_names_make_unique()
-    if args.seq_tech == 'Visium':
-        sc.pp.filter_genes(adata, min_cells=5)
-    elif args.seq_tech == 'Stere-seq':
-        sc.pp.filter_genes(adata, min_cells=50)
-    sc.pp.highly_variable_genes(adata, flavor="seurat_v3", n_top_genes=args.num_features)
-    sc.pp.normalize_total(adata, target_sum=1e4)
-    sc.pp.log1p(adata)
-    adata = adata[:, adata.var['highly_variable']]
     if isinstance(adata.X, sp.csr_matrix):
         graph.ndata["feat"] = torch.tensor(adata.X.todense().copy(), dtype=torch.float32)
     else:
@@ -94,22 +160,19 @@ def build_graph(args, adata, need_preclust=True):
         graph.ndata["feat_scaled"] = torch.tensor(adata.X.todense().copy(), dtype=torch.float32)  
     else:
         graph.ndata["feat_scaled"] = torch.tensor(adata.X.copy(), dtype=torch.float32)
-
-    if need_preclust:
-        if(args.cluster_label == ""):
-            num_classes = args.num_classes
-        else:
-            num_classes = adata.obs[args.cluster_label].nunique()
-        cluster_label, cluster_prob, cluster_uncertainty = preclust(adata, graph, num_classes, key="feat", pre_agg=args.pre_aggregation)
-        adata.obs["pseudo_label"] = cluster_label
-        adata.obsm["mclust_prob"] = cluster_prob
-        adata.obs["uncertainty"] = cluster_uncertainty
-        cluster_label, cluster_prob, cluster_uncertainty = preclust(adata, graph, num_classes, key="feat_scaled", pre_agg=args.pre_aggregation)
-        adata.obs["pseudo_label_scaled"] = cluster_label
-        adata.obsm["mclust_prob_scaled"] = cluster_prob
-        adata.obs["uncertainty_scaled"] = cluster_uncertainty
-
     return adata, graph
+
+def Generate_pseudo_label(args, adata, graph):
+    print("================== Generating pseudo-label ================")
+    cluster_label, cluster_prob, cluster_uncertainty = preclust(adata, graph, args.num_classes, key="feat", pre_agg=args.pre_aggregation[0])
+    adata.obs["pseudo_label"] = cluster_label
+    adata.obsm["mclust_prob"] = cluster_prob
+    adata.obs["uncertainty"] = cluster_uncertainty
+    cluster_label, cluster_prob, cluster_uncertainty = preclust(adata, graph, args.num_classes, key="feat_scaled", pre_agg=args.pre_aggregation[1])
+    adata.obs["pseudo_label_scaled"] = cluster_label
+    adata.obsm["mclust_prob_scaled"] = cluster_prob
+    adata.obs["uncertainty_scaled"] = cluster_uncertainty
+    return adata
 
 def transfer_preprocess(args, adata_ref_list, adata_target):
     print("=============== Contructing graph =================")
@@ -177,15 +240,15 @@ def transfer_preprocess(args, adata_ref_list, adata_target):
 
     return adata_ref_list, adata_target, graph_ref_list, graph_target
 
-def train(args, adata, graph, num_classes):
-    print("=============== Building model ===============")
+def Train(args, adata, graph):
+    print("==================== Building model ====================")
     device = args.device if args.device >= 0 else "cpu"
     lr = args.lr
     optim_type = args.optimizer
     weight_decay = args.weight_decay
     set_random_seed(args.seeds)
 
-    model = build_model(args, num_classes, spot_num=adata.n_obs)
+    model = build_model(args, spot_num=adata.n_obs)
     optimizer = create_optimizer(optim_type, model, lr, weight_decay)
     model, adata = pretrain(args, model, adata, graph, optimizer)
 
@@ -289,14 +352,15 @@ def preclust(adata, graph, num_classes, key="feat", pre_agg=1):
     pca = PCA(n_components=20, random_state=42)
     embedding = pca.fit_transform(graph.ndata['feat_aggregated'].numpy().copy())
     adata.obsm["emb_pca"] = embedding
-    
     return mclust_R(adata, used_obsm="emb_pca", num_cluster=num_classes)
 
 
 def mclust_R(adata, num_cluster, modelNames='EEE', used_obsm='emb_pca', random_seed=2020):
     np.random.seed(random_seed)
     import rpy2.robjects as robjects
+    robjects.r('options(warn=-1)') 
     robjects.r('.libPaths(c("/home/wcy/R/x86_64-pc-linux-gnu-library/4.2", .libPaths()))')
+    robjects.r('suppressPackageStartupMessages(library(mclust))')
     robjects.r.library("mclust")
 
     import rpy2.robjects.numpy2ri
@@ -312,7 +376,24 @@ def mclust_R(adata, num_cluster, modelNames='EEE', used_obsm='emb_pca', random_s
     mclust_uncertainty = np.array(res[-1])
     return mclust_result, mclust_prob, mclust_uncertainty
 
-def refine_label(adata, radius=50, key='label'):
+
+def Ensemble_clustering(adata, radius, num_classes, top_num=10, cluster_key=['cluster_pred1', 'cluster_pred2'], store_key='combined_refine'):
+    if radius > 0:
+        adata.obs["pred1_refine"] = Refine_label(adata, radius, key=cluster_key[0])
+        adata.obs["pred2_refine"] = Refine_label(adata, radius, key=cluster_key[1])
+    else:
+        adata.obs["pred1_refine"] = adata.obs[cluster_key[0]]
+        adata.obs["pred2_refine"] = adata.obs[cluster_key[1]]
+    adata.obs["combined"] = HBGF(adata, ["pred1_refine", "pred2_refine"], num_classes, top_num=top_num)
+    if radius > 0:
+        adata.obs[store_key] = Refine_label(adata, radius, key='combined')
+    else:
+        adata.obs[store_key] = adata.obs["combined"]
+    adata, new_key = Test_refine(adata, num_classes, max_neigh=radius, key='combined', refined_key=store_key)
+    return adata, new_key
+
+
+def Refine_label(adata, radius=50, key='label'):
     n_neigh = radius
     new_type = []
     old_type = adata.obs[key].values
@@ -335,7 +416,7 @@ def refine_label(adata, radius=50, key='label'):
     
     return new_type
 
-def test_refine(adata, num_classes, max_neigh=50, radius=6, key='label', refined_key='label_refine'):
+def Test_refine(adata, num_classes, max_neigh=50, radius=6, key='label', refined_key='label_refine'):
     if len(np.unique(adata.obs[refined_key].values)) == num_classes:
         print("Nothing changed!")
         return adata, refined_key
@@ -354,7 +435,7 @@ def test_refine(adata, num_classes, max_neigh=50, radius=6, key='label', refined
 
         for test_radius in test_radius_list[:-1]:
             new_key = refined_key + "_" + str(test_radius)
-            adata.obs[new_key] = refine_label(adata, radius=test_radius, key=key)
+            adata.obs[new_key] = Refine_label(adata, radius=test_radius, key=key)
             if len(np.unique(adata.obs[new_key].values)) == num_classes:
                 print("Try new radius! Result is stored in '" + new_key + "'.")
                 return adata, new_key
@@ -381,7 +462,7 @@ def clustering(adata, n_clusters=7, radius=50, key='emb', method='mclust', start
        adata.obs['domain'] = adata.obs['louvain'] 
        
     if refinement:  
-       new_type = refine_label(adata, radius, key='domain')
+       new_type = Refine_label(adata, radius, key='domain')
        adata.obs['domain'] = new_type 
 
 def HBGF(adata, keys, num_classes, top_num=10):
@@ -433,37 +514,6 @@ def HBGF_fast(adata, keys, pred_class, combined_class, random_seed=2020, top_num
     res = rmclust(rpy2.robjects.numpy2ri.numpy2rpy(v), combined_class, "EEE")
     return res[-2][2*pred_class:]
 
-def read_Stereo_seq(path):
-    count_path = os.path.join(path, "RNA_counts.tsv")
-    pos_path = os.path.join(path, "position.tsv")
-    spot_path = os.path.join(path, "used_barcodes.txt")
-    counts = pd.read_csv(count_path, sep='\t', index_col=0)
-    pos = pd.read_csv(pos_path, sep='\t')
-    used_barcode = pd.read_csv(spot_path, sep='\t', header=None)
-
-    counts.columns = ['Spot_'+str(x) for x in counts.columns]
-    pos.index = pos['label'].map(lambda x: 'Spot_'+str(x))
-    pos = pos.loc[:, ['x','y']]
-    pos.columns = ["imagerow","imagecol"]
-
-    adata = sc.AnnData(counts.T)
-    adata.var_names_make_unique()
-    pos = pos.loc[adata.obs_names, ['imagerow', 'imagecol']]
-    adata.obsm["spatial"] = pos.to_numpy()
-    adata.obs["imagerow"] = 0
-    adata.obs["imagecol"] = 0
-    adata.obs["imagerow"] = adata.obsm["spatial"][:, 0]
-    adata.obs["imagecol"] = adata.obsm["spatial"][:, 1]
-    sc.pp.calculate_qc_metrics(adata, inplace=True)
-
-    used_barcode = used_barcode[0]
-    adata = adata[used_barcode,]
-    return adata
-
-def read_BLCA(path):
-    adata = sc.read_h5ad(path+".h5ad")
-    adata.obsm["spatial"] = adata.obs[["imagerow", "imagecol"]].to_numpy()
-    return adata
 
 def find_influential_component(args, adata, graph, clust_id):
     x = graph.ndata["feat"]
@@ -542,31 +592,7 @@ def compute_Moran_mean(adata, graph, svg_path):
         moran_sum += Moran(data, w)
     return moran_sum/len(svg)
 
-def read_slideseq_V2(path):
-    count_path = os.path.join(path, "digital_expression.txt")
-    pos_path = os.path.join(path, "bead_locations.csv")
-    spot_path = os.path.join(path, "used_barcodes.txt")
-    gene_expression = pd.read_table(count_path)
-    position = pd.read_csv(pos_path, index_col=0)
-    used_barcodes = pd.read_table(spot_path, header=None)
 
-    obs_name = list(used_barcodes[0].values)
-    var_name = list(gene_expression["GENE"].values)
-    X = gene_expression[used_barcodes[0].values].T.values
-    adata = sc.AnnData(X)
-    adata.obs_names = obs_name
-    adata.var_names = var_name
-
-    position.index = position["barcode"]
-    position = position.loc[obs_name]
-    spatial = position[['xcoord', 'ycoord']].values
-    adata.obsm["spatial"] = spatial
-
-    adata.obs["imagerow"] = 0
-    adata.obs["imagecol"] = 0
-    adata.obs["imagerow"] = adata.obsm["spatial"][:, 0]
-    adata.obs["imagecol"] = adata.obsm["spatial"][:, 1]
-    return adata
 
 
 

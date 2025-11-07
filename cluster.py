@@ -1,23 +1,23 @@
 import os
-import warnings
-import warnings
-import argparse
-
-import scanpy as sc
-import pandas as pd
-from sklearn.metrics import adjusted_rand_score
-from matplotlib import pyplot as plt
-
-import Riff
 os.environ['R_HOME'] = '/usr/lib/R'
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+import warnings
 warnings.filterwarnings("ignore")
+import argparse
+import logging
+logging.getLogger('rpy2').setLevel(logging.WARNING)
+
+import pandas as pd
+from sklearn.metrics import adjusted_rand_score
+
+import Riff
+
 
 
 def build_args():
     parser = argparse.ArgumentParser(description="GAT")
     parser.add_argument("--seeds", type=int, default=0)
-    parser.add_argument("--device", type=int, default=3)
+    parser.add_argument("--device", type=int, default=9)
     parser.add_argument("--warmup_steps", type=int, default=-1)
     parser.add_argument("--num_heads", type=int, default=4, help="number of hidden attention heads")
     parser.add_argument("--num_out_heads", type=int, default=1, help="number of output attention heads")
@@ -62,13 +62,13 @@ def build_args():
     # Riff parameter
     parser.add_argument("--num_neighbors", type=int, default=7)
     parser.add_argument("--confidence_threshold", type=float, default=3e-3)
-    parser.add_argument("--pre_aggregation", type=int, default=1)
+    parser.add_argument("--pre_aggregation", type=int, default=[1, 1])
     parser.add_argument("--min_pseudo_label", type=int, default=3000)
     parser.add_argument("--num_features", type=int, default=3000)
     parser.add_argument("--seq_tech", type=str, default="Visium")
     parser.add_argument("--sample_name", type=str, default="151674")
     parser.add_argument("--cluster_label", type=str, default= "layer_guess")
-    parser.add_argument("--folder_name", type=str, default="/home/wcy/code/datasets/10X")  
+    parser.add_argument("--folder_name", type=str, default="/home/wcy/code/datasets/Visium/DLPFC")  
     parser.add_argument("--num_classes", type=int, default=7, help = "The number of clusters")
     parser.add_argument("--top_num", type=int, default=10)
     parser.add_argument("--radius", type=int, default=50)
@@ -79,34 +79,38 @@ def build_args():
     return args
 
 def main(args):
-
+    args.device = args.device if args.device >= 0 else "cpu"
+    
+    '''Note: Change the folder path to read your own dataset'''
+    '''============================= Read data ============================='''
     data_path = os.path.join(args.folder_name, args.sample_name)
-    # adata = Riff.read_BLCA(data_path)
-    # adata = Riff.read_Stereo_seq(data_path)
-    # adata = sc.read_h5ad(data_path + ".h5ad")
-    adata = Riff.read_10X_Visium_with_label(data_path)
-    # adata = Riff.read_h5ad(data_path)
-    # adata = Riff.read_slideseq_V2(data_path)
-    if(args.cluster_label == ""):
-        num_classes = args.num_classes
-    else:
-        num_classes = adata.obs[args.cluster_label].nunique()
+    adata = Riff.Read_Visium_with_label(data_path)                                    # Read standard 10x Visium data
+    # adata = Riff.Read_Stereoseq(data_path)                                          # An example to read data stored like: expression/spatial info/metadata in .tsv file 
+    # adata = Riff.Read_SlideseqV2(data_path)                                         # An example to read data stored like: expression/metadata in .txt file, spatial info in .csv file 
+    # h5_path = os.path.join(args.folder_name, args.sample_name, "cell_feature_matrix.h5")
+    # obs_path = os.path.join(args.folder_name, args.sample_name, "cells.csv")
+    # adata = Riff.Read_Xenium(h5_path, obs_path)                                     # Read standard 10x Xenium data
+
+    if(args.cluster_label != ""):
+        args.num_classes = adata.obs[args.cluster_label].nunique()
         adata.obs[args.cluster_label] = adata.obs[args.cluster_label].astype('category')
-    # graph construction and training
-    adata, graph = Riff.build_graph(args, adata)
-    adata, _ = Riff.train(args, adata, graph, num_classes)
+
+    '''============================= Preprocess ============================='''
+    adata = Riff.Preprocess_adata(args, adata)
+    adata, graph = Riff.Build_graph(args, adata, spatial_key='image_coor')
+    adata = Riff.Generate_pseudo_label(args, adata, graph)
+
+    '''================================ Train ================================'''
+    adata, _ = Riff.Train(args, adata, graph) 
+    adata, new_key = Riff.Ensemble_clustering(adata, args.radius, args.num_classes, args.top_num)
+    if args.output_folder is not None:
+        adata.write_h5ad(args.output_folder + '/adata/' + args.sample_name + '.h5ad')
+        print("adata saved to " + args.output_folder + '/adata/' + args.sample_name + '.h5ad')
     
-    adata.obs["pred1_refine"] = Riff.refine_label(adata, args.radius, key='cluster_pred1')
-    adata.obs["pred2_refine"] = Riff.refine_label(adata, args.radius, key='cluster_pred2')
-    adata.obs["combined"] = Riff.HBGF(adata, ["pred1_refine", "pred2_refine"], num_classes, top_num=args.top_num)
-    adata.obs["combined_refine"] = Riff.refine_label(adata, args.radius, key='combined')
-    adata, new_key = Riff.test_refine(adata, num_classes, max_neigh=args.radius, key='combined', refined_key='combined_refine')
-    
-    
+    '''============================== Evaluation ============================='''
     adata_reduce = adata[~pd.isnull(adata.obs[args.cluster_label])]
     ari = adjusted_rand_score(adata_reduce.obs[args.cluster_label], adata_reduce.obs[new_key])
-    print(round(ari, 4))
-    adata.write_h5ad(args.output_folder + '/adata/' + args.sample_name + '.h5ad')
+    print(args.sample_name + " ARI: " + str(round(ari, 4)))
 
 
     
