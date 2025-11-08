@@ -1,7 +1,7 @@
 from .edcoder import PreModel, TransferModel
 
 
-def build_model(args, num_classes, spot_num=0):
+def build_model(args, spot_num=0):
     num_heads = args.num_heads
     num_out_heads = args.num_out_heads
     num_hidden = args.num_hidden
@@ -24,7 +24,7 @@ def build_model(args, num_classes, spot_num=0):
     beta_l = args.beta_l
     num_features = args.num_features
     warm_up = args.warm_up
-    K = num_classes
+    K = args.num_classes
 
 
     model = PreModel(
