@@ -167,7 +167,7 @@ def create_optimizer(opt, model, lr, weight_decay, get_num_layer=None, get_layer
 
 # -------------------
 def pretrain(args, model, adata, graph, optimizer, scheduler=None):
-    print("=============== Start training ===============")
+    print("==================== Start training ====================")
     device = args.device if args.device >= 0 else "cpu"
 
     certain_spot = {}
@@ -187,7 +187,6 @@ def pretrain(args, model, adata, graph, optimizer, scheduler=None):
     pseudo_label = {"not_scaled": torch.tensor(adata.obs["pseudo_label"].values-1, dtype = torch.long).to(device),
                     "scaled": torch.tensor(adata.obs["pseudo_label_scaled"].values-1, dtype = torch.long).to(device)}
 
-    print("===================== Clustering =======================")
     epoch_iter = tqdm(range(args.max_epoch))
     for epoch in epoch_iter:
         model.train()
@@ -211,27 +210,16 @@ def pretrain(args, model, adata, graph, optimizer, scheduler=None):
             ari_rec = adjusted_rand_score(true_label, pred_reduce_rec)
             pred_reduce2 = pred2_label[~pd.isnull(adata.obs[args.cluster_label])]
             ari2 = adjusted_rand_score(true_label, pred_reduce2)
-            epoch_iter.set_description(f"# Epoch {epoch}: train_loss: {loss.item():.2f}, ari: {ari1:.2f}, ari: {ari2:.2f}, ari: {ari_rec:.2f}")
+            epoch_iter.set_description(f"# Epoch {epoch}: train_loss: {loss.item():.2f}")
 
     pred1 = nn.Softmax(dim=0)(pred1)
     pred2 = nn.Softmax(dim=0)(pred2)
-    torch.save(model.state_dict(), args.output_folder + "/model/" + args.sample_name + ".pth")
+    if args.output_folder is not None:
+        torch.save(model.state_dict(), args.output_folder + "/model/" + args.sample_name + ".pth")
+        print('Trained model saved to ' + args.output_folder + "/model/" + args.sample_name + ".pth")
     adata.obs["cluster_pred1"] = pred1_label
     adata.obs["cluster_pred2"] = pred2_label
     adata.obs["cluster_recon"] = pred_rec
-
-    print("===================== Imputation =======================")
-    epoch_iter = tqdm(range(300))
-    for epoch in epoch_iter:
-        model.train()
-        loss_rec, _, _, _, _, _, _ = model(graph, x, pseudo_label, certain_spot)
-        loss = 0.001*loss_rec
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        if scheduler is not None:
-            scheduler.step()   
 
     return model, adata
 
